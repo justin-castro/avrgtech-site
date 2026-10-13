@@ -216,12 +216,16 @@ export default function App() {
   const outRef = React.useRef<HTMLPreElement>(null)
   const copy = () => {
     const fallback = () => {
-      const range = document.createRange()
-      if (outRef.current) range.selectNodeContents(outRef.current)
-      const sel = window.getSelection()
-      sel?.removeAllRanges()
-      sel?.addRange(range)
-      setStatus("Brief selected. Press Ctrl+C or Cmd+C to copy it.")
+      setShowText(true)
+      // wait for the email text to be shown before selecting it
+      window.setTimeout(() => {
+        const range = document.createRange()
+        if (outRef.current) range.selectNodeContents(outRef.current)
+        const sel = window.getSelection()
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+        setStatus("Brief selected. Press Ctrl+C or Cmd+C to copy it.")
+      }, 60)
     }
     try {
       if (navigator.clipboard?.writeText) {
@@ -231,6 +235,57 @@ export default function App() {
       fallback()
     }
   }
+
+  // What a brief needs before it is worth sending, in the order the form asks.
+  const emailOk = /^\S+@\S+\.\S+$/.test(brief.email.trim())
+  const essentials = [
+    { id: "b-brand", done: !!brief.brand.trim(), hint: "Add your brand name." },
+    { id: "b-email", done: emailOk, hint: brief.email.trim() ? "Check your email address so Justin can reply." : "Add your email so Justin can reply." },
+    { id: "b-product", done: !!brief.product.trim(), hint: "Tell us what you're launching." },
+    { id: "b-need", done: brief.deliverables.length > 0, hint: "Pick at least one thing you need." },
+  ]
+  const doneCount = essentials.filter((e) => e.done).length
+  const [showErrors, setShowErrors] = React.useState(false)
+  const [sent, setSent] = React.useState(false)
+  const [showText, setShowText] = React.useState(false)
+  const missing = (id: string) => showErrors && !essentials.find((e) => e.id === id)?.done
+  const hintFor = (id: string) => essentials.find((e) => e.id === id)?.hint
+  const send = (e: React.MouseEvent) => {
+    const first = essentials.find((x) => !x.done)
+    if (first) {
+      e.preventDefault()
+      setShowErrors(true)
+      setStatus(first.hint ?? "")
+      const el = document.getElementById(first.id)
+      el?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "center" })
+      ;(el?.querySelector("input") ?? el)?.focus({ preventScroll: true })
+      return
+    }
+    setSent(true)
+    setStatus("")
+  }
+  // Phones: a slim send bar while the form is on screen but the brief card is not
+  const sheetRef = React.useRef<HTMLDivElement>(null)
+  const [barShow, setBarShow] = React.useState(false)
+  React.useEffect(() => {
+    const book = document.getElementById("book")
+    const sheet = sheetRef.current
+    if (!book || !sheet || typeof IntersectionObserver === "undefined") return
+    let inBook = false
+    let sheetSeen = false
+    const update = () => setBarShow(inBook && !sheetSeen && window.innerWidth <= 820)
+    const io1 = new IntersectionObserver(([e]) => { inBook = e.isIntersecting; update() }, { threshold: 0 })
+    const io2 = new IntersectionObserver(([e]) => { sheetSeen = e.isIntersecting; update() }, { threshold: 0.15 })
+    io1.observe(book)
+    io2.observe(sheet)
+    window.addEventListener("resize", update)
+    return () => { io1.disconnect(); io2.disconnect(); window.removeEventListener("resize", update) }
+  }, [])
+  React.useEffect(() => {
+    if (sent) setSent(false)
+    if (showErrors && essentials.every((x) => x.done)) setStatus("")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief])
 
   // Hero starter bar
   const [starterProduct, setStarterProduct] = React.useState("")
@@ -455,79 +510,135 @@ export default function App() {
             </div>
             <div className="book-grid lamp">
               <form className="brief-form" noValidate onSubmit={(e) => e.preventDefault()}>
-                <div className="pair">
-                  <div className="group">
-                    <label className="label" htmlFor="b-brand">Brand</label>
-                    <input ref={brandRef} className="field" id="b-brand" type="text" autoComplete="organization" placeholder="Your brand" value={brief.brand} onChange={(e) => set({ brand: e.target.value })} />
+                <fieldset className="step">
+                  <legend className="step-head">
+                    <span className="step-n" aria-hidden="true">1</span>
+                    <span>You</span>
+                  </legend>
+                  <div className="pair">
+                    <div className="group">
+                      <label className="flabel" htmlFor="b-brand">Brand</label>
+                      <input ref={brandRef} className="field" id="b-brand" type="text" autoComplete="organization" placeholder="Your brand" value={brief.brand} onChange={(e) => set({ brand: e.target.value })} aria-invalid={missing("b-brand") || undefined} aria-describedby={missing("b-brand") ? "b-brand-hint" : undefined} />
+                      {missing("b-brand") ? <p className="hint" id="b-brand-hint">{hintFor("b-brand")}</p> : null}
+                    </div>
+                    <div className="group">
+                      <label className="flabel" htmlFor="b-name">Your name <span className="opt">(optional)</span></label>
+                      <input className="field" id="b-name" type="text" autoComplete="name" placeholder="Name" value={brief.name} onChange={(e) => set({ name: e.target.value })} />
+                    </div>
                   </div>
                   <div className="group">
-                    <label className="label" htmlFor="b-name">Your name</label>
-                    <input className="field" id="b-name" type="text" autoComplete="name" placeholder="Name" value={brief.name} onChange={(e) => set({ name: e.target.value })} />
-                  </div>
-                </div>
-                <div className="group">
-                  <label className="label" htmlFor="b-product">Product</label>
-                  <input className="field" id="b-product" type="text" placeholder="What are you launching?" value={brief.product} onChange={(e) => set({ product: e.target.value })} />
-                </div>
-                <fieldset className="group">
-                  <legend className="label">What you need</legend>
-                  <div className="chips">
-                    {DELIVERABLES.map((d) => (
-                      <label className="chip" key={d}>
-                        <input type="checkbox" checked={brief.deliverables.includes(d)} onChange={() => toggle(d)} />
-                        <span>{d === "UGC for our channels" ? "UGC" : d === "Dedicated YouTube video" ? "YouTube video" : d}</span>
-                      </label>
-                    ))}
+                    <label className="flabel" htmlFor="b-email">Your email</label>
+                    <input className="field" id="b-email" type="email" autoComplete="email" inputMode="email" placeholder="you@brand.com" value={brief.email} onChange={(e) => set({ email: e.target.value })} aria-invalid={missing("b-email") || undefined} aria-describedby={missing("b-email") ? "b-email-hint" : undefined} />
+                    {missing("b-email") ? <p className="hint" id="b-email-hint">{hintFor("b-email")}</p> : null}
                   </div>
                 </fieldset>
-                <fieldset className="group">
-                  <legend className="label">Who leads</legend>
-                  <div className="chips">
-                    {LEADS.map((l) => (
-                      <label className="chip" key={l}>
-                        <input type="radio" name="lead" checked={brief.lead === l} onChange={() => set({ lead: l })} />
-                        <span>{l}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-                <fieldset className="group">
-                  <legend className="label">Ads on the post</legend>
-                  <div className="chips">
-                    {ADS.map((a) => (
-                      <label className="chip" key={a.value}>
-                        <input type="radio" name="ads" checked={brief.ads === a.value} onChange={() => set({ ads: a.value })} />
-                        <span>{a.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-                <div className="pair">
+
+                <fieldset className="step">
+                  <legend className="step-head">
+                    <span className="step-n" aria-hidden="true">2</span>
+                    <span>The campaign</span>
+                  </legend>
                   <div className="group">
-                    <label className="label" htmlFor="b-when">Go-live date</label>
+                    <label className="flabel" htmlFor="b-product">Product</label>
+                    <input className="field" id="b-product" type="text" placeholder="What are you launching?" value={brief.product} onChange={(e) => set({ product: e.target.value })} aria-invalid={missing("b-product") || undefined} aria-describedby={missing("b-product") ? "b-product-hint" : undefined} />
+                    {missing("b-product") ? <p className="hint" id="b-product-hint">{hintFor("b-product")}</p> : null}
+                  </div>
+                  <fieldset className="group" id="b-need" aria-describedby={missing("b-need") ? "b-need-hint" : undefined}>
+                    <legend className="flabel">What you need</legend>
+                    <div className="chips">
+                      {DELIVERABLES.map((d) => (
+                        <label className="chip" key={d}>
+                          <input type="checkbox" checked={brief.deliverables.includes(d)} onChange={() => toggle(d)} />
+                          <span>{d === "UGC for our channels" ? "UGC" : d === "Dedicated YouTube video" ? "YouTube video" : d}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {missing("b-need") ? <p className="hint" id="b-need-hint">{hintFor("b-need")}</p> : null}
+                  </fieldset>
+                  <div className="group">
+                    <label className="flabel" htmlFor="b-when">Go-live date <span className="opt">(optional)</span></label>
                     <input className="field" id="b-when" type="text" placeholder="e.g. mid November" value={brief.when} onChange={(e) => set({ when: e.target.value })} />
                   </div>
+                </fieldset>
+
+                <fieldset className="step">
+                  <legend className="step-head">
+                    <span className="step-n" aria-hidden="true">3</span>
+                    <span>How it runs</span>
+                  </legend>
+                  <fieldset className="group">
+                    <legend className="flabel">Who leads</legend>
+                    <div className="chips">
+                      {LEADS.map((l) => (
+                        <label className="chip" key={l}>
+                          <input type="radio" name="lead" checked={brief.lead === l} onChange={() => set({ lead: l })} />
+                          <span>{l}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <fieldset className="group">
+                    <legend className="flabel">Ads on the post</legend>
+                    <div className="chips">
+                      {ADS.map((a) => (
+                        <label className="chip" key={a.value}>
+                          <input type="radio" name="ads" checked={brief.ads === a.value} onChange={() => set({ ads: a.value })} />
+                          <span>{a.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
                   <div className="group">
-                    <label className="label" htmlFor="b-email">Your email</label>
-                    <input className="field" id="b-email" type="email" autoComplete="email" placeholder="you@brand.com" value={brief.email} onChange={(e) => set({ email: e.target.value })} />
+                    <label className="flabel" htmlFor="b-notes">Anything else <span className="opt">(optional)</span></label>
+                    <textarea className="field" id="b-notes" placeholder="Key features, exclusivity, reposting, product photos..." value={brief.notes} onChange={(e) => set({ notes: e.target.value })} />
                   </div>
-                </div>
-                <div className="group">
-                  <label className="label" htmlFor="b-notes">Anything else</label>
-                  <textarea className="field" id="b-notes" placeholder="Key features, exclusivity, reposting, product photos..." value={brief.notes} onChange={(e) => set({ notes: e.target.value })} />
-                </div>
+                </fieldset>
               </form>
 
-              <aside className="output glass-dark" aria-labelledby="out-title">
-                <span className="label" id="out-title">Your brief</span>
-                <pre ref={outRef} aria-live="polite">{text}</pre>
-                <div className="actions">
-                  <a className="btn btn-primary" href={mailto} onClick={() => setStatus("If your email app did not open, copy the brief and send it to " + ADDRESS + ".")}>
-                    Email the brief
-                  </a>
-                  <button className="btn btn-ghost" type="button" onClick={copy}>Copy brief</button>
+              <aside className="output" aria-labelledby="out-title">
+                <div className="sheet glass-dark" ref={sheetRef}>
+                  <div className="sheet-top">
+                    <span className="label" id="out-title">Your brief</span>
+                    <span className="sheet-count">{doneCount} of 4 essentials</span>
+                  </div>
+                  <div className="meter" role="progressbar" aria-label="Essentials filled in" aria-valuemin={0} aria-valuemax={4} aria-valuenow={doneCount}>
+                    <i style={{ width: (doneCount / 4) * 100 + "%" }} />
+                  </div>
+                  <h3 className="sheet-title">
+                    <span className={brief.brand.trim() ? "" : "empty"}>{brief.brand.trim() || "Your brand"}</span>
+                    <span className="x" aria-hidden="true"> × </span>
+                    <span className={brief.product.trim() ? "" : "empty"}>{brief.product.trim() || "your product"}</span>
+                  </h3>
+                  <ul className="sheet-chips" aria-label="Deliverables">
+                    {brief.deliverables.length ? (
+                      DELIVERABLES.filter((d) => brief.deliverables.includes(d)).map((d) => <li key={d}>{d}</li>)
+                    ) : (
+                      <li className="empty">Nothing picked yet</li>
+                    )}
+                  </ul>
+                  <dl className="sheet-facts">
+                    <div><dt>Who leads</dt><dd>{brief.lead}</dd></div>
+                    <div><dt>Ads</dt><dd>{brief.ads}</dd></div>
+                    <div><dt>Go-live</dt><dd className={brief.when.trim() ? "" : "empty"}>{brief.when.trim() || "Not set"}</dd></div>
+                    <div><dt>Reply to</dt><dd className={emailOk ? "" : "empty"}>{emailOk ? [brief.name.trim(), brief.email.trim()].filter(Boolean).join(", ") : "Not set"}</dd></div>
+                  </dl>
+                  {sent ? (
+                    <p className="sent" role="status">
+                      <strong>Brief ready.</strong> If your email app didn't open, copy it and send it to {ADDRESS}.
+                    </p>
+                  ) : null}
+                  <div className="actions">
+                    <a className="btn btn-primary" href={mailto} onClick={send}>
+                      Email the brief
+                    </a>
+                    <button className="btn btn-ghost" type="button" onClick={copy}>Copy brief</button>
+                  </div>
+                  <p className="status" role="status">{status}</p>
+                  <button type="button" className="text-toggle" aria-expanded={showText} aria-controls="brief-text" onClick={() => setShowText((s) => !s)}>
+                    {showText ? "Hide the email text" : "See the email text"}
+                  </button>
+                  <pre id="brief-text" ref={outRef} hidden={!showText}>{text}</pre>
                 </div>
-                <p className="status" role="status">{status}</p>
                 <div className="contact">
                   <strong>Justin, Creator &amp; Owner</strong>
                   <span className="addr">{ADDRESS}</span>
@@ -538,6 +649,14 @@ export default function App() {
                   <li>Ads run on the original published video. No raw footage or edits.</li>
                 </ul>
               </aside>
+              <div className="brief-bar glass-dark" data-show={barShow || undefined} aria-hidden={!barShow}>
+                <span>
+                  <strong>Brief</strong> · {doneCount} of 4
+                </span>
+                <a className="btn btn-primary" href={mailto} onClick={send} tabIndex={barShow ? undefined : -1}>
+                  Send
+                </a>
+              </div>
             </div>
           </div>
         </section>
