@@ -392,7 +392,7 @@ export default function App() {
           <div className="wrap">
             <div className="sec-head">
               <h2 id="reach-title">An audience that's already watching<Dot /></h2>
-              <p>People follow avrgtech for calm desk mornings, coffee and the gear on the desk. The most-played reel passed 304K plays.</p>
+              <p>People follow avrgtech for calm desk mornings, coffee and the gear on the desk. Three recent product videos passed 240K views on TikTok. The Intel Gamer Days build reached 1.8M.</p>
             </div>
             <div className="counts">
               {COUNTS.map((c) => (
@@ -402,7 +402,7 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <p className="label source">Plays as shown on Instagram, October 2026</p>
+            <p className="label source">Views as shown on Instagram and TikTok, October 2026</p>
           </div>
         </section>
 

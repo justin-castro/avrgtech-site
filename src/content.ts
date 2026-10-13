@@ -2,6 +2,7 @@ import type { ArtRecipe, FolderFile } from "@/components/ui/glass-folder-cards"
 
 const R = "/assets/reels/"
 const ig = (code: string) => `https://www.instagram.com/reel/${code}/`
+const tt = (id: string) => `https://www.tiktok.com/@avrgtech/video/${id}`
 
 /** Clay marble: the brand orange folding through the warm slab. */
 export const CLAY: ArtRecipe = {
@@ -31,12 +32,12 @@ export type Folder = { label: string; meta: string; seed: number; files: FolderF
 export const FOLDERS: Folder[] = [
   {
     label: "Desk mornings",
-    meta: "Up to 304.2K plays",
+    meta: "Up to 304.2K views",
     seed: 4,
     files: [
-      { name: "Cruise and coffee", meta: "4.2K plays", image: R + "cruise-coffee.jpg", href: ig("Dcrcum-pZ1O") },
-      { name: "Limit distractions", meta: "113.9K plays", image: R + "limit-distractions.jpg", href: ig("DB37zfxuWTs") },
-      { name: "Coffee and Witchfire", meta: "304.2K plays", image: R + "witchfire-desk.jpg", href: ig("DAlWrrfuwZU") },
+      { name: "Cruise and coffee", meta: "4.2K on IG", image: R + "cruise-coffee.jpg", href: ig("Dcrcum-pZ1O") },
+      { name: "Limit distractions", meta: "113.9K on IG", image: R + "limit-distractions.jpg", href: ig("DB37zfxuWTs") },
+      { name: "Coffee and Witchfire", meta: "304.2K on IG", image: R + "witchfire-desk.jpg", href: ig("DAlWrrfuwZU") },
     ],
   },
   {
@@ -44,20 +45,20 @@ export const FOLDERS: Folder[] = [
     meta: "Corsair, MSI, ASUS",
     seed: 9,
     files: [
-      { name: "ASUS Prime RX 9070 EVO", meta: "3.9K plays", image: R + "asus-prime-rx9070.jpg", href: ig("DdwZdDsMKhj") },
-      { name: "MSI VIXTA 300R PZ", meta: "15.3K plays", image: R + "msi-vixta.jpg", href: ig("DeHrkKFsD3M") },
-      { name: "Corsair Warthog", meta: "32K plays", image: R + "corsair-warthog.jpg", href: ig("DdmwBYIp2SD") },
-      { name: "Corsair Xeneon Edge", meta: "62.9K plays", image: R + "corsair-xeneon-edge.jpg", href: ig("DeKGDZwMaPJ") },
+      { name: "ASUS RX 9070 EVO", meta: "241.8K on TikTok", image: R + "asus-prime-rx9070.jpg", href: tt("7689880840892976397") },
+      { name: "MSI VIXTA 300R PZ", meta: "791K on TikTok", image: R + "msi-vixta.jpg", href: tt("7693233157989993742") },
+      { name: "Corsair Warthog", meta: "32K on IG", image: R + "corsair-warthog.jpg", href: ig("DdmwBYIp2SD") },
+      { name: "Corsair Xeneon Edge", meta: "62.9K on IG", image: R + "corsair-xeneon-edge.jpg", href: ig("DeKGDZwMaPJ") },
     ],
   },
   {
     label: "Gaming at the desk",
-    meta: "Up to 266.2K plays",
+    meta: "Up to 1.8M views",
     seed: 15,
     files: [
-      { name: "Intel Gamer Days", meta: "1.9K plays", image: R + "intel-gamer-days.jpg", href: ig("DdZQuunxK0w") },
-      { name: "Gaming as a reset", meta: "2.4K plays", image: R + "gaming-reset.jpg", href: ig("Dcjbq0TpLoV") },
-      { name: "Helldivers, Liberty Day", meta: "266.2K plays", image: R + "helldivers-desk.jpg", href: ig("DBl8GaqOcnm") },
+      { name: "Intel Gamer Days", meta: "1.8M on TikTok", image: R + "intel-gamer-days.jpg", href: tt("7686541779025382669") },
+      { name: "Gaming as a reset", meta: "2.4K on IG", image: R + "gaming-reset.jpg", href: ig("Dcjbq0TpLoV") },
+      { name: "Helldivers, Liberty Day", meta: "266.2K on IG", image: R + "helldivers-desk.jpg", href: ig("DBl8GaqOcnm") },
     ],
   },
 ]
@@ -75,9 +76,9 @@ export const WORK: Work[] = [
 
 export const COUNTS = [
   { n: "41.0K", label: "Instagram followers" },
-  { n: "6.5K", label: "TikTok followers" },
+  { n: "6.8K", label: "TikTok followers" },
   { n: "1.2K", label: "YouTube subscribers" },
-  { n: "304.2K", label: "Plays on the top reel" },
+  { n: "2.1M", label: "Views on the top TikTok" },
 ]
 
 export const COZY = [
