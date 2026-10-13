@@ -1,6 +1,6 @@
 import * as React from "react"
-import GlassFolder, { ArtCanvas, type ArtRecipe } from "@/components/ui/glass-folder-cards"
-import { ADS, CLAY, CLAY_LIGHT, COUNTS, COZY, DELIVERABLES, FOLDERS, LEADS, LINKS, SOCIAL, WORK } from "@/content"
+import GlassFolder from "@/components/ui/glass-folder-cards"
+import { ADS, COUNTS, COZY, DELIVERABLES, FOLDERS, LEADS, LINKS, SOCIAL, WORK } from "@/content"
 
 const ADDRESS = "avrg.tech@gmail.com"
 const BLANK = "(not set)"
@@ -25,10 +25,72 @@ function useFolderWidth() {
   return width
 }
 
-function ArtField({ art, seed, w, h, density = 0.6 }: { art: ArtRecipe; seed: number; w: number; h: number; density?: number }) {
+/**
+ * The folders' hover, shared: cards lean toward the cursor and lift a little.
+ * Mouse only, and nothing at all under reduced motion.
+ */
+function useLean() {
+  React.useEffect(() => {
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)")
+    if (!fine.matches || reduced()) return
+    const cards = Array.from(document.querySelectorAll<HTMLElement>(".lean"))
+    const off: (() => void)[] = []
+    cards.forEach((el) => {
+      let raf = 0
+      let x = 0
+      let y = 0
+      const write = () => {
+        raf = 0
+        el.style.setProperty("--lx", x.toFixed(3))
+        el.style.setProperty("--ly", y.toFixed(3))
+      }
+      const move = (e: PointerEvent) => {
+        const r = el.getBoundingClientRect()
+        x = ((e.clientX - r.left) / r.width) * 2 - 1
+        y = ((e.clientY - r.top) / r.height) * 2 - 1
+        if (!raf) raf = requestAnimationFrame(write)
+      }
+      const leave = () => {
+        x = 0
+        y = 0
+        if (!raf) raf = requestAnimationFrame(write)
+      }
+      el.addEventListener("pointermove", move)
+      el.addEventListener("pointerleave", leave)
+      off.push(() => {
+        el.removeEventListener("pointermove", move)
+        el.removeEventListener("pointerleave", leave)
+        cancelAnimationFrame(raf)
+      })
+    })
+    return () => off.forEach((f) => f())
+  }, [])
+}
+
+/** A small glass bar that slides in once the hero has scrolled away. */
+function Dock() {
+  const [show, setShow] = React.useState(false)
+  const ref = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => {
+    const hero = document.querySelector(".top")
+    if (!hero || typeof IntersectionObserver === "undefined") return
+    const io = new IntersectionObserver(([e]) => setShow(!e.isIntersecting), { threshold: 0 })
+    io.observe(hero)
+    return () => io.disconnect()
+  }, [])
+  React.useEffect(() => {
+    ref.current?.toggleAttribute("inert", !show)
+  }, [show])
   return (
-    <div className="art-field" aria-hidden="true">
-      <ArtCanvas art={art} seed={seed} w={w} h={h} density={density} priority={2} />
+    <div ref={ref} className="dock glass-dark" data-show={show || undefined} aria-hidden={!show}>
+      <a className="mark" href="#">
+        avrg<b>tech</b>
+      </a>
+      <nav aria-label="Quick links">
+        <a href="#work">Work</a>
+        <a href="#formats">Formats</a>
+        <a className="pill" href="#book">Start a campaign</a>
+      </nav>
     </div>
   )
 }
@@ -55,6 +117,7 @@ type Brief = {
 
 export default function App() {
   const folderWidth = useFolderWidth()
+  useLean()
   const foldersRef = React.useRef<HTMLDivElement>(null)
 
   // Reel links leave the site, so open them in a new tab.
@@ -141,6 +204,8 @@ export default function App() {
 
   return (
     <>
+      <a className="skip" href="#main">Skip to content</a>
+      <Dock />
       <header className="top">
         <div className="wrap">
           <nav className="nav" aria-label="Main">
@@ -218,7 +283,7 @@ export default function App() {
         </div>
       </header>
 
-      <main>
+      <main id="main">
         <section id="reach" aria-labelledby="reach-title">
           <div className="wrap">
             <div className="sec-head">
@@ -245,9 +310,9 @@ export default function App() {
             </div>
             <div className="work-row">
               {WORK.map((w) => (
-                <article className="tile" key={w.title}>
+                <article className="tile lean" key={w.title}>
                   <a href={`https://www.instagram.com/reel/${w.ig}/`} target="_blank" rel="noopener" aria-label={"Watch the " + w.title + " video on Instagram"}>
-                    <img src={w.img} alt={w.alt} loading="lazy" width={203} height={360} />
+                    <img src={w.img} alt={w.alt} loading="lazy" decoding="async" width={203} height={360} />
                   </a>
                   <div className="cap glass">
                     <h3>{w.title}</h3>
@@ -272,17 +337,17 @@ export default function App() {
               <h2 id="formats-title">Pick who leads the creative<Dot /></h2>
               <p>Every video is filmed and edited by avrgtech. Rates come back with your brief, sized to the campaign you describe.</p>
             </div>
-            <div className="lead-choice">
-              <article className="choice dark">
-                <ArtField art={CLAY} seed={31} w={900} h={460} density={0.7} />
-                <div className="pane glass">
+            <div className="lead-choice lamp">
+              <article className="choice dark lean">
+                <span className="tab glass-dark" aria-hidden="true" />
+                <div className="pane glass-dark">
                   <h3>Built to your brief<Dot /></h3>
                   <p>Your talking points, script approval and direction. Includes 30 days of ads on the published post, on the platform you choose.</p>
                 </div>
               </article>
-              <article className="choice light">
-                <ArtField art={CLAY_LIGHT} seed={8} w={900} h={460} density={0.7} />
-                <div className="pane glass">
+              <article className="choice light lean">
+                <span className="tab glass-light" aria-hidden="true" />
+                <div className="pane glass-light">
                   <h3>avrgtech's idea, your product<Dot /></h3>
                   <p>avrgtech's own concept and edit, with your key features worked in naturally. One round of changes, organic post.</p>
                 </div>
@@ -339,7 +404,7 @@ export default function App() {
               <h2 id="book-title">Build your brief<Dot /></h2>
               <p>Answer a few questions and the brief writes itself. Send it to avrgtech and you'll get scope and rates back.</p>
             </div>
-            <div className="book-grid">
+            <div className="book-grid lamp">
               <form className="brief-form" noValidate onSubmit={(e) => e.preventDefault()}>
                 <div className="pair">
                   <div className="group">
@@ -404,7 +469,7 @@ export default function App() {
                 </div>
               </form>
 
-              <aside className="output" aria-labelledby="out-title">
+              <aside className="output glass-dark" aria-labelledby="out-title">
                 <span className="label" id="out-title">Your brief</span>
                 <pre ref={outRef} aria-live="polite">{text}</pre>
                 <div className="actions">
@@ -451,8 +516,8 @@ export default function App() {
               <div className="cozy">
                 {COZY.map((c) => (
                   <a className="reel" key={c.caption} href={c.href} target="_blank" rel="noopener">
-                    <figure>
-                      <img src={c.img} alt={c.alt} loading="lazy" width={203} height={360} />
+                    <figure className="lean">
+                      <img src={c.img} alt={c.alt} loading="lazy" decoding="async" width={203} height={360} />
                     </figure>
                     <p>{c.caption}</p>
                   </a>
