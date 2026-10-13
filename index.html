@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>avrgtech</title>
-<meta name="description" content="avrgtech makes chill, cinematic videos about tech, coffee, cameras and desk setups: sponsored posts, UGC and local business video. Start a campaign.">
+<meta name="description" content="avrgtech makes cinematic tech and desk-setup videos: sponsored posts, UGC and local business video for brands that care how their product looks.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&family=Sometype+Mono:wght@500&display=swap">
@@ -79,13 +79,13 @@ img { max-width: 100%; display: block; }
 
 /* Hero */
 .hero { padding-block: clamp(20px, 2.6vw, 32px) 0; display: grid; gap: clamp(22px, 2.8vw, 34px); }
-.hero-head { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 32px; align-items: end; }
-.hero h1 { font-size: clamp(44px, 6.4vw, 96px); line-height: .92; font-weight: 800; letter-spacing: -.04em; }
+.hero-head { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.hero h1 { font-size: clamp(40px, 6vw, 86px); line-height: .92; font-weight: 800; letter-spacing: -.04em; }
 .hero h1 em { font-style: normal; color: var(--orange); }
-.hero-lead { color: var(--slab-muted); font-size: clamp(16px, 1.4vw, 19px); line-height: 1.6; max-width: 40ch; padding-bottom: 10px; }
+.hero-lead { color: var(--slab-muted); font-size: clamp(16px, 1.4vw, 19px); line-height: 1.6; max-width: 62ch; }
 .hero-lead strong { color: var(--slab-ink); font-weight: 600; }
 
-.stage { --pw: clamp(150px, calc((100svh - 560px) * .5625), 236px); display: flex; justify-content: center; align-items: flex-end; gap: clamp(14px, 3.4vw, 56px); }
+.stage { --pw: clamp(150px, calc((100svh - 600px) * .5625), 236px); display: flex; justify-content: center; align-items: flex-end; gap: clamp(14px, 3.4vw, 56px); }
 .phone-col { display: grid; gap: 14px; justify-items: center; }
 .phone { display: block; text-decoration: none; color: #fff; position: relative; width: var(--pw); aspect-ratio: 9 / 16; border-radius: clamp(24px, 3vw, 38px); border: clamp(6px, .8vw, 10px) solid #0d0b0a; background: #0d0b0a; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7); transform: translateY(var(--lift, 0)); transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
 .phone-col.mid .phone { width: calc(var(--pw) * 1.12); }
@@ -236,6 +236,7 @@ footer .mark { color: var(--ink); font-size: 20px; }
 }
 @media (max-width: 560px) {
   .stage { gap: 10px; }
+  .br-lg { display: none; }
   .phone-col { flex: 1 1 0; min-width: 0; }
   .phone, .phone-col.mid .phone { width: 100%; }
   .ui-top, .ui-bottom small, .ui-rail { display: none; }
@@ -270,8 +271,8 @@ footer .mark { color: var(--ink); font-size: 20px; }
 
     <div class="hero">
       <div class="hero-head">
-        <h1>Your gear,<br><em>shot like a film<span class="dot">.</span></em></h1>
-        <p class="hero-lead">Chill, cinematic videos about tech, coffee, cameras, computers and desk setups. <strong>Sponsored posts, UGC and local business video,</strong> all shot in the same style.</p>
+        <h1>Your product, on the<br class="br-lg"> <em>setup people want<span class="dot">.</span></em></h1>
+        <p class="hero-lead">Cinematic tech and desk-setup videos, made in-house from concept to final cut. Sponsored posts, UGC and local business video, <strong>for brands that care how their product looks.</strong></p>
       </div>
 
       <div class="stage" aria-label="Three avrgtech reels">
