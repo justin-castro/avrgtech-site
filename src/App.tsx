@@ -238,7 +238,6 @@ export default function App() {
         </section>
 
         <section id="work" className="work" aria-labelledby="work-title">
-          <ArtField art={CLAY} seed={22} w={1800} h={1100} density={0.5} />
           <div className="wrap">
             <div className="sec-head">
               <h2 id="work-title">Recent product videos<Dot /></h2>

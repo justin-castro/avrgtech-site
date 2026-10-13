@@ -120,7 +120,6 @@ section { padding-block: clamp(72px, 9vw, 120px); }
 /* Work: glass captions over the covers, on a clay field */
 .work { position: relative; background: var(--slab); color: var(--slab-ink); overflow: hidden; }
 .work::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--orange); z-index: 2; }
-.work .art-field::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(24, 21, 18, .82) 0%, rgba(24, 21, 18, .55) 45%, rgba(24, 21, 18, .9) 100%); }
 .work .wrap { position: relative; }
 .work .sec-head p { color: var(--slab-muted); }
 .work-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
