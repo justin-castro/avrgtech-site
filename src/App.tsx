@@ -173,7 +173,7 @@ export default function App() {
                   label={f.label}
                   meta={f.meta}
                   tone="dark"
-                  art={CLAY}
+                  art="none"
                   seed={f.seed}
                   files={f.files}
                   action="none"
