@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>avrgtech</title>
     <meta name="description" content="avrgtech makes cinematic tech and desk-setup videos: sponsored posts, UGC and local business video for brands that care how their product looks." />
-    <meta name="theme-color" content="#181512" />
+    <script>
+      // Dark by default; apply a saved choice before first paint so the page never flashes.
+      ;(function () {
+        var t = "dark"
+        try {
+          if (localStorage.getItem("avrg-theme") === "light") t = "light"
+        } catch (e) {}
+        document.documentElement.setAttribute("data-theme", t)
+      })()
+    </script>
+    <meta name="theme-color" content="#121113" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href="https://avrg.tech/" />
     <meta property="og:type" content="website" />

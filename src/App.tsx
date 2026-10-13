@@ -67,8 +67,54 @@ function useLean() {
   }, [])
 }
 
+type Theme = "dark" | "light"
+
+/** Dark by default; a visitor's own choice is remembered on this device. */
+function useTheme(): [Theme, () => void] {
+  const [theme, setTheme] = React.useState<Theme>(() =>
+    typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark",
+  )
+  const toggle = React.useCallback(() => {
+    setTheme((t) => {
+      const next: Theme = t === "dark" ? "light" : "dark"
+      const root = document.documentElement
+      if (!reduced()) {
+        root.classList.add("theme-anim")
+        window.setTimeout(() => root.classList.remove("theme-anim"), 400)
+      }
+      root.setAttribute("data-theme", next)
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#121113" : "#181512")
+      try {
+        localStorage.setItem("avrg-theme", next)
+      } catch {
+        /* storage blocked: the choice lasts for this visit */
+      }
+      return next
+    })
+  }, [])
+  return [theme, toggle]
+}
+
+function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
+  const toLight = theme === "dark"
+  return (
+    <button type="button" className="theme-btn" onClick={onToggle} aria-label={toLight ? "Switch to light mode" : "Switch to dark mode"} title={toLight ? "Light mode" : "Dark mode"}>
+      {toLight ? (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+        </svg>
+      )}
+    </button>
+  )
+}
+
 /** A small glass bar that slides in once the hero has scrolled away. */
-function Dock() {
+function Dock({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
   const [show, setShow] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)
   React.useEffect(() => {
@@ -89,6 +135,7 @@ function Dock() {
       <nav aria-label="Quick links">
         <a href="#work">Work</a>
         <a href="#formats">Formats</a>
+        <ThemeToggle theme={theme} onToggle={onToggle} />
         <a className="pill" href="#book">Start a campaign</a>
       </nav>
     </div>
@@ -118,6 +165,7 @@ type Brief = {
 export default function App() {
   const folderWidth = useFolderWidth()
   useLean()
+  const [theme, toggleTheme] = useTheme()
   const foldersRef = React.useRef<HTMLDivElement>(null)
 
   // Reel links leave the site, so open them in a new tab.
@@ -205,7 +253,7 @@ export default function App() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      <Dock />
+      <Dock theme={theme} onToggle={toggleTheme} />
       <header className="top">
         <div className="wrap">
           <nav className="nav" aria-label="Main">
@@ -216,6 +264,7 @@ export default function App() {
               <li className="hide-sm"><a href="#work">Work</a></li>
               <li className="hide-sm"><a href="#formats">Formats</a></li>
               <li className="hide-sm"><a href="#watch">Watch</a></li>
+              <li><ThemeToggle theme={theme} onToggle={toggleTheme} /></li>
               <li><a className="pill" href="#book">Start a campaign</a></li>
             </ul>
           </nav>

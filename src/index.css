@@ -21,14 +21,6 @@
   --radius: 14px;
   --gutter: clamp(20px, 4.4vw, 64px);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #121113; --surface: #1a191b; --ink: #ecebea; --muted: #a3a09c; --line: #2c2a2b;
-    --orange: #e78a53; --orange-text: #f0a072;
-    --slab: #1f1a17; --slab-2: #2a2420; --slab-line: #453a32;
-    color-scheme: dark;
-  }
-}
 :root[data-theme="dark"] {
   --bg: #121113; --surface: #1a191b; --ink: #ecebea; --muted: #a3a09c; --line: #2c2a2b;
   --orange: #e78a53; --orange-text: #f0a072;
@@ -270,3 +262,11 @@ footer .mark { color: var(--ink); font-size: 20px; }
   .dock { gap: 14px; padding-left: 16px; }
   .dock nav a:not(.pill) { display: none; }
 }
+
+/* Theme toggle */
+:root { color-scheme: light; }
+.theme-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--slab-line); background: transparent; color: var(--slab-ink); cursor: pointer; transition: border-color .15s, background-color .15s; }
+.theme-btn:hover { border-color: var(--orange); }
+.theme-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dock .theme-btn { width: 36px; height: 36px; border-color: rgba(255, 255, 255, .16); color: #f5efe9; }
+html.theme-anim, html.theme-anim body, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after { transition: background-color .35s ease-out, border-color .35s ease-out, color .35s ease-out !important; }
